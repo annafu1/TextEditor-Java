@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
+import javax.swing.*;
 
 //TextEditor class starts here
 class TextEditor extends Frame implements ActionListener {
@@ -11,7 +12,18 @@ class TextEditor extends Frame implements ActionListener {
     String months[] = { "January", "February", "March", "April", "May", "June", "July", "August", "September",
             "October", "November", "December" };
     CheckboxMenuItem chkb = new CheckboxMenuItem("Word Wrap");
-
+    JMenuItem FINDEDIT;
+    JMenuItem REPLACEDIT;
+    JMenuItem PRINTFILE;
+    JButton saveFile;
+    JMenuItem SAVEASFILE;
+    JScrollPane scroller;
+    JMenu FORMAT;
+    JCheckBoxMenuItem WORDFORMAT;
+    JMenuItem FONT;
+    String fileN;
+    String file;
+    boolean opened;
     public TextEditor() {
         MenuBar mb = new MenuBar();
         setLayout(new BorderLayout());
@@ -21,6 +33,15 @@ class TextEditor extends Frame implements ActionListener {
         Menu m2 = new Menu("Edit");
         Menu m3 = new Menu("Tools");
         Menu m4 = new Menu("Help");
+        this.SAVEASFILE = new JMenu ("Save as");
+        this.saveFile = new JButton("save");
+        this.FINDEDIT = new JMenuItem("Find");
+        this.REPLACEDIT = new JMenuItem("Replace");
+        this.scroller = new JScrollPane(this.ta);
+        this.PRINTFILE = new JMenuItem("Print...");
+        this.FORMAT = new JMenu("Format");
+        this.WORDFORMAT = new JCheckBoxMenuItem("Word Wrap");
+        this.FONT = new JMenuItem("Font");
         mb.add(m1);
         mb.add(m2);
         mb.add(m3);
@@ -159,6 +180,38 @@ class TextEditor extends Frame implements ActionListener {
         TextEditor to = new TextEditor();
     }
 
+    public void saveFile() {
+        String line = this.ta.getText();
+        if (this.opened) {
+            try {
+                FileWriter output = new FileWriter(this.file);
+                BufferedWriter bufout = new BufferedWriter(output);
+                bufout.write(line, 0, line.length());
+                JOptionPane.showMessageDialog((Component)null, "Save Successful");
+                bufout.close();
+                output.close();
+            } catch (IOException var7) {
+                var7.printStackTrace();
+            }
+        } else {
+            JFileChooser fc = new JFileChooser();
+            int result = fc.showSaveDialog(new JPanel());
+            if (result == 0) {
+                this.fileN = String.valueOf(fc.getSelectedFile());
+
+                try {
+                    FileWriter output = new FileWriter(this.fileN);
+                    BufferedWriter bufout = new BufferedWriter(output);
+                    bufout.write(line, 0, line.length());
+                    JOptionPane.showMessageDialog((Component)null, "Save Successful");
+                    bufout.close();
+                    output.close();
+                    this.opened = true;
+                } catch (IOException var6) {
+                    var6.printStackTrace();
+                }
+            }
+    }
 }
 
 class MyWindowsAdapter extends WindowAdapter {
@@ -169,7 +222,15 @@ class MyWindowsAdapter extends WindowAdapter {
     }
 
     public void windowClosing(WindowEvent we) {
-        tt.dispose();
+        int confirm = JOptionPane.showConfirmDialog((Component) null, "Would you like to save?", "Exit Application", 1);
+        if (confirm == 0) {
+            tt.saveFile();
+            tt.dispose();
+            System.exit(0);
+        } else if (confirm != 2) {
+            tt.dispose();
+            System.exit(0);
+        }
     }
 }
 
@@ -183,5 +244,6 @@ class AboutDialog extends Dialog implements ActionListener {
 
     public void actionPerformed(ActionEvent ae) {
         dispose();
+    }
     }
 }
